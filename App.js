@@ -1,5 +1,6 @@
 import React from 'react';
-import MapView, { Marker } from 'react-native-maps';
+import Communications from 'react-native-communications';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import { StyleSheet, Text, TextInput, View, Button, Alert } from 'react-native';
 import { auto } from 'async';
 
@@ -11,10 +12,24 @@ export default class App extends React.Component {
   
   donationAmount = ''
   formattedString = ''
-  place = 'Free the Footlong'
+  place = 'End Evil'
+  donateText = <View style={styles.buttonMap}>
+                  <Button
+                    title='Find Nearest Evil'
+                    onPress = {()=>{
+                      this.setMyMarker()
+                    }}
+                    color='#fff'
+                    />
+                </View>
   subway = {
-    latitude: 37.7247506,
-    longitude: -122.4819726
+    latitude: 37.723160, 
+    longitude: -122.482245
+  }
+
+  sendRandomSMS() {
+    FTF = '6504369848'
+    Communications.text(FTF, 'Give $' + this.donationAmount + ' to Free the Footlong')
   }
 
   onChanged(text) { 
@@ -28,7 +43,6 @@ export default class App extends React.Component {
   }
 
   removeFromDollars(text) {
-    //localText = text
     if (text) {
       text.replace(/\D/g,'')
     }
@@ -44,6 +58,21 @@ export default class App extends React.Component {
     } else {
       return '$' + localText
     }
+  }
+
+  myMarker = <Text></Text>
+
+  setMyMarker() {
+    this.myMarker = <Marker
+      title = 'Subway'
+      description = {`Free the Footlong`}
+      coordinate={this.subway}
+    />
+    this.place = 'Free the Footlong'
+    this.donateText = <Text style={styles.donationInner}>Donate to Free the Footlong</Text>
+    Alert.alert(`You are near a Subway. Although beloved by hungry people everywhere, Subway has a long history of abusing young submarine sandwiches. Free The Footlong (FTF) is a charitable organization that was founded in 1899 with a singular goal: improve the welfare of footlong sandwiches everywhere. Since then, FTF has expanded its mandate to protecting sandwiches of all sizes, colors, national origins, and ages. Your donation will go to the Footlong Forever Fund, which FTF uses to free helpless sandwiches from persecution.
+    `)
+    this.forceUpdate()
   }
 
   render() {
@@ -62,21 +91,16 @@ export default class App extends React.Component {
         }}
         showsUserLocation={true}
         >
-        <Marker
-          title = 'Subway'
-          coordinate={this.subway}
-        >
-
-        </Marker>
+        {this.myMarker}
         </MapView>
       
         <View style={styles.container}>
           <View style={styles.donationSection}>
-            <Text style={styles.donationInner}>Donate to {this.place}</Text>
+            {this.donateText}
           </View>
           <TextInput 
             style={styles.donationInput}
-            placeholder='Enter amount here!'
+            placeholder='Enter donation amount here!'
             keyboardType = 'numeric'
             onChangeText = {(text)=> this.onChanged(text)}
             value = {this.state.number}
@@ -88,7 +112,8 @@ export default class App extends React.Component {
           <View style={styles.buttonSection}>
             <Button 
             onPress = {() => {
-              Alert.alert('You have donated $' + this.donationAmount + ' to ' + this.place + '!')
+              this.sendRandomSMS()
+              Alert.alert('You have donated' + this.donationAmount + ' to ' + this.place + '!')
             }}
             title='Donate'
             color='#fff'
@@ -110,10 +135,14 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 30,
+    fontWeight: 'bold',
     color: '#fff'
   },
   map: {
     flex: 6,
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingTop: '2%'
   },
   container: {
     flex: 2,
@@ -137,6 +166,11 @@ const styles = StyleSheet.create({
   },
   donationInput: {
     fontSize: 20,
+  },
+  buttonMap: {
+    width: '60%',
+    borderRadius: 30,
+    backgroundColor: '#03DAC5',
   },
   buttonSection: {
     backgroundColor: '#03DAC5',
